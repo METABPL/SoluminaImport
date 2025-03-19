@@ -1,4 +1,3 @@
-import sys
 import uuid
 import re
 
@@ -356,11 +355,9 @@ class ImportSolumina:
             found = True
             for column in columns:
                 if not hasattr(obj, column[0]):
-                    print("In table {}, no such column {}".format(table_name, column[0]))
                     found = False
                     break
                 if str(column[1]) != str(getattr(obj, column[0])):
-                    print("In table {}, column {} value {} != {}".format(table_name, column[0], getattr(obj,column[0]), column[1]))
                     found = False
                     break
             if found:
@@ -398,7 +395,6 @@ class ImportSolumina:
                     object_info = select_oi
                     break
 
-        print("Table {} creating object of type {}".format(table_name, object_info["type"]))
         node = create_class(object_info["type"])
         if parent is not None and parent_field is not None:
             getattr(parent, parent_field).append(node)
@@ -421,7 +417,6 @@ class ImportSolumina:
                     if "mult" in positioning["y"]:
                         y = y * positioning["y"]["mult"]
 
-            print("Position set to {},{}".format(x,y))
             if x is not None and y is not None:
                 setattr(node, "x", x)
                 setattr(node, "y", y)
@@ -429,18 +424,15 @@ class ImportSolumina:
         joins = []
         if "join" in object_info:
             for join in object_info["join"]:
-                print("Performing join to {}".format(join["table"]))
                 columns = []
                 for key in join["keys"]:
                     columns.append((key, getattr(obj, key)))
                 joined_objs = self.query(join["table"], columns, plan_table)
-                print("Found {} objects in join to {}".format(len(joined_objs), join["table"]))
                 if len(joined_objs) > 1:
-                    print("There should only be one instance of a joined object")
+                    pass
                 elif len(joined_objs) == 1:
                     joins.append(joined_objs[0])
 
-        print("Joined objects: {}".format(joins))
         use_uuid = None
         for attr_name, attr_column in object_info["attributes"].items():
             if attr_column == "$uuid":
@@ -457,7 +449,6 @@ class ImportSolumina:
                             attr_value = self.get_text(plan_table, getattr(join, text_col))
                             if attr_value is not None:
                                 break
-                    print("{} has no column named {}".format(table_name, text_col))
             elif "${" in attr_column:
                 attr_value = embedded_replace(attr_column, obj, joins)
             else:
@@ -467,10 +458,8 @@ class ImportSolumina:
                 if attr_value is None:
                     for join in joins:
                         if hasattr(join, attr_column):
-                            print("Join has column {}".format(attr_column))
                             attr_value = getattr(join, attr_column)
                         if attr_value is not None:
-                            print("Using join value {} for {}".format(attr_value, attr_column))
                             break
 
             if attr_value is not None:
@@ -504,7 +493,6 @@ class ImportSolumina:
 
                 child_table = child["table"]
                 if child_table not in plan_table:
-                    print("Skipping table "+child_table)
                     continue
                 children = plan_table[child_table][:]
                 if "orderBy" in child:
@@ -589,7 +577,6 @@ class ImportSolumina:
                 if "only" in links:
                     (_nc, _obj, child_info) = added_children[child_id]
                     if child_info["table"] in links["only"]:
-                        print("Adding {} to start and end nodes".format(child_id))
                         start_nodes.add(child_id)
                         end_nodes.add(child_id)
 
@@ -598,27 +585,21 @@ class ImportSolumina:
                 dst_id = getattr(link, link_info["dst"])
 
                 if src_id not in added_children:
-                    print("Can't find linked src child {}".format(src_id))
                     continue
 
                 if dst_id not in added_children:
-                    print("Can't find linked dst child {}".format(dst_id))
                     continue
 
                 src_node = added_children[src_id][0]
                 dst_node = added_children[dst_id][0]
 
                 if dst_id in start_nodes:
-                    print("Removing {} from start nodes".format(dst_id))
                     start_nodes.remove(dst_id)
                 if src_id in end_nodes:
-                    print("Removing {} from end nodes".format(src_id))
                     end_nodes.remove(src_id)
-                print("Linking {} to {}".format(src_id, dst_id))
 
                 self.make_connector(node, src_node, dst_node)
 
-            print("Added links = {}".format(added_links))
             for added_link in added_links:
                 (from_node, node_info, keys) = added_link
                 for added_child in added_children.values():
@@ -627,7 +608,6 @@ class ImportSolumina:
                         if not hasattr(added_child[1], key[1]):
                             found = False
                             break
-                        print("Looking for child with {} {} = {} {}".format(key[1],getattr(added_child[1],key[1]),key[0],getattr(node_info, key[0])))
                         if str(getattr(node_info, key[0])) != str(getattr(added_child[1], key[1])):
                             found = False
                             break
@@ -635,19 +615,16 @@ class ImportSolumina:
                         self.make_connector(node, from_node, added_child[0])
                         src_id = getattr(from_node, "bplElementId")
                         dst_id = getattr(added_child[0], "bplElementId")
-                        print("Making custom link from {} to {}".format(src_id, dst_id))
 
                         if dst_id in start_nodes:
                             start_nodes.remove(dst_id)
                         if src_id in end_nodes:
                             end_nodes.remove(src_id)
 
-            print("Start nodes = {}".format(start_nodes))
-            print("End nodes = {}".format(end_nodes))
             if len(start_nodes) != 1 and len(added_links) > 0:
-                print("Error - there should be only one start node")
+#                print("Error - there should be only one start node")
+                pass
             elif len(start_nodes) == 1:
-                print("Start nodes {}".format(start_nodes))
                 start_evt = create_class("StartEvent")
                 setattr(start_evt, "name", "StartEvent")
                 getattr(node, "bPLElements").append(start_evt)
@@ -966,18 +943,3 @@ def load_process(filename):
     plan_table = load_plan(filename)
     process = importer.import_plan(plan_table, filename)
     return process
-
-def main():
-
-    #        plan_name = "PLAN-0000102-1-1-0.xml"
-    #        plan_name = "PLAN-0000002-1-3-0_UAV_Demo2.xml"
-    plan_name = "PLAN-0000096-1-1-0_Generator.xml"
-
-    if len(sys.argv) > 1:
-        plan_name = sys.argv[1]
-
-    process = load_process(plan_name)
-    print("Process:\n", process)
-
-if __name__ == "__main__":
-    main()
