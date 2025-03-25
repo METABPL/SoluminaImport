@@ -15,8 +15,8 @@ translate_table = {
                        "attributes": {
                            "bplProcessName": "PLAN_ID",
                            "bplProcessId": "PLAN_ID",
-                           "BPLElementUUID": "$uuid",
-                           "Description": "${PLAN_NO}_${PLAN_TITLE}",
+                           "bplElementUUID": "$uuid",
+                           "description": "${PLAN_NO}_${PLAN_TITLE}",
                            "name": "${PLAN_NO}_${PLAN_TITLE}",
                        },
                        "children": [
@@ -34,7 +34,7 @@ translate_table = {
                            {"table": "SFPL_MFG_BOM_COMP",
                             "parent_field": "resourceRequirements", "keys": ["BOM_ID"]},
                            {"table": "SFPL_PLAN_NODE", "keys": ["PLAN_ID"],
-                        "parent_field": "bPLElements"}],
+                        "parent_field": "bplElements"}],
                        "links":
                            {"table": "SFPL_PLAN_LINK", "keys": ["PLAN_ID"], "only": ["SFPL_PLAN_NODE"]},
     },
@@ -44,8 +44,8 @@ translate_table = {
         "attributes": {
             "bplElementName": "${NODE_TYPE}${NODE_NO}",
             "bplElementId": "NODE_ID",
-            "BPLElementUUID": "$uuid",
-            "Description": "NODE_TITLE",
+            "bplElementUUID": "$uuid",
+            "description": "NODE_TITLE",
             "name": "NODE_TITLE",
         },
         "children": [],
@@ -58,8 +58,8 @@ translate_table = {
         "attributes": {
             "bplElementName": "${NODE_TYPE}${NODE_NO}",
             "bplElementId": "NODE_ID",
-            "BPLElementUUID": "$uuid",
-            "Description": "Return to ${RETURN_TO_OPER_NO}",
+            "bplElementUUID": "$uuid",
+            "description": "Return to ${RETURN_TO_OPER_NO}",
             "name": "Return to ${RETURN_TO_OPER_NO}",
         },
         "link_to": [{"keys": [("RETURN_TO_OPER_KEY","OPER_KEY")]}],
@@ -71,12 +71,12 @@ translate_table = {
         "attributes": {
             "bplElementName": "${NODE_TYPE}${NODE_NO}",
             "bplElementId": "NODE_ID",
-            "BPLElementUUID": "$uuid",
-            "Description": "NODE_TITLE",
+            "bplElementUUID": "$uuid",
+            "description": "NODE_TITLE",
             "name": "NODE_TITLE",
         },
         "children": [{"table": "SFPL_STEP_REV", "keys": ["PLAN_ID", "OPER_KEY"], "orderBy": "STEP_NO",
-                      "parent_field": "bPLElements", "connect": True},
+                      "parent_field": "bplElements", "connect": True},
 
 
 #                     {"table": "SFPL_OPER_SKILL", "container": {
@@ -104,8 +104,8 @@ translate_table = {
         "attributes": {
             "bplElementName": "FOOTER_${OPER_NO}",
             "bplElementId": "$uuid",
-            "BPLElementUUID": "$uuid",
-            "Description": "FOOTER_${OPER_NO}",
+            "bplElementUUID": "$uuid",
+            "description": "FOOTER_${OPER_NO}",
             "name": "FOOTER_${OPER_NO}",
             "documentation": "$text(TEXT)",
         },
@@ -136,9 +136,9 @@ translate_table = {
             "attributes": {
                 "bplElementName": "Operation${OPER_NO}Step${STEP_NO}",
                 "bplElementId": "$uuid",
-                "BPLElementUUID": "$uuid",
+                "bplElementUUID": "$uuid",
                 "name": "Operation${OPER_NO}Step${STEP_NO}",
-                "Description": "STEP_TITLE",
+                "description": "STEP_TITLE",
                 "documentation": "$text(TEXT)",
             },
             "children": [
@@ -160,22 +160,22 @@ translate_table = {
                  "parent_field": "resourceRequirements"}
             ],
             "siblings": [{"table": "SFPL_STEP_DAT_COL", "keys": ["PLAN_ID", "OPER_KEY", "STEP_KEY"],
-                          "parent_field": "bPLElements"}],
+                          "parent_field": "bplElements"}],
         }],
     "SFPL_STEP_DAT_COL": {
         "type": "DataCollection",
         "attributes": {
             "bplElementName": "DataCollection${OPER_KEY}Step${STEP_KEY}Dat${DAT_COL_ID}",
             "bplElementId": "$uuid",
-            "BPLElementUUID": "$uuid",
+            "bplElementUUID": "$uuid",
             "name": "DataCollection${OPER_KEY}Step${STEP_KEY}Dat${DAT_COL_ID}",
-            "Description": "DataCollection${OPER_KEY}Step${STEP_KEY}Dat${DAT_COL_ID}",
+            "description": "DataCollection${OPER_KEY}Step${STEP_KEY}Dat${DAT_COL_ID}",
             "upperLimit": "UPPER_LIMIT",
             "lowerLimit": "LOWER_LIMIT",
             "targetValue": "TARGET_VALUE",
         },
         "siblings": [{"table": "SFPL_STEP_BUYOFF", "keys": ["PLAN_ID", "OPER_KEY", "STEP_KEY"],
-                      "parent_field": "bPLElements"},],
+                      "parent_field": "bplElements"},],
         "custom_content": None,
     },
     "SFPL_STEP_TOOL": {
@@ -183,8 +183,8 @@ translate_table = {
         "attributes": {
             "bplElementName": "TOOL_NO",
             "bplElementId": "$uuid",
-            "BPLElementUUID": "$uuid",
-            "Description": "TOOL_TITLE",
+            "bplElementUUID": "$uuid",
+            "description": "TOOL_TITLE",
             "name": "TOOL_TITLE",
             "quantity": "QTY",
         },
@@ -196,8 +196,8 @@ translate_table = {
         "attributes": {
             "bplElementName": "${BOM_ID}_${BOM_COMP_TOOL_ID}",
             "bplElementId": "$uuid",
-            "BPLElementUUID": "$uuid",
-            "Description": "PART_TITLE",
+            "bplElementUUID": "$uuid",
+            "description": "PART_TITLE",
             "name": "PART_TITLE",
             "quantity": "QTY",
         },
@@ -208,8 +208,8 @@ translate_table = {
         "attributes": {
             "bplElementName": "$uuid",
             "bplElementId": "$uuid",
-            "BPLElementUUID": "$uuid",
-            "Description": "SKILL_CATEGORY",
+            "bplElementUUID": "$uuid",
+            "description": "SKILL_CATEGORY",
             "name": "SKILL_CATEGORY",
         },
         "children": [],
@@ -219,8 +219,8 @@ translate_table = {
         "attributes": {
             "bplElementName": "PART_NO",
             "bplElementId": "$uuid",
-            "BPLElementUUID": "$uuid",
-            "Description": "PART_TITLE",
+            "bplElementUUID": "$uuid",
+            "description": "PART_TITLE",
             "name": "PART_TITLE",
             "quantity": "ITEM_QTY",
         },
@@ -232,8 +232,8 @@ translate_table = {
         "attributes": {
             "bplElementName": "${BOM_ID}_${BOM_COMP_TOOL_ID}",
             "bplElementId": "$uuid",
-            "BPLElementUUID": "$uuid",
-            "Description": "PART_TITLE",
+            "bplElementUUID": "$uuid",
+            "description": "PART_TITLE",
             "name": "PART_TITLE",
             "quantity": "QTY",
         },
@@ -244,8 +244,8 @@ translate_table = {
         "attributes": {
             "bplElementName": "$uuid",
             "bplElementId": "$uuid",
-            "BPLElementUUID": "$uuid",
-            "Description": "${BUYOFF_TYPE} Buyoff",
+            "bplElementUUID": "$uuid",
+            "description": "${BUYOFF_TYPE} Buyoff",
             "name": "BUYOFF_TITLE",
         },
         "children": [],
@@ -489,7 +489,7 @@ class ImportSolumina:
                     new_uuid = str(uuid.uuid4())
                     setattr(prev_child, "bplElementName", new_uuid)
                     setattr(prev_child, "bplElementId", new_uuid)
-                    setattr(prev_child, "BPLElementUUID", new_uuid)
+                    setattr(prev_child, "bplElementUUID", new_uuid)
 
                 child_table = child["table"]
                 if child_table not in plan_table:
@@ -530,8 +530,8 @@ class ImportSolumina:
                                 new_uuid = str(uuid.uuid4())
                                 setattr(container_node, "bplElementName", container_info["title"])
                                 setattr(container_node, "bplElementId", new_uuid)
-                                setattr(container_node, "BPLElementUUID", new_uuid)
-                                setattr(container_node, "Description", container_info["title"])
+                                setattr(container_node, "bplElementUUID", new_uuid)
+                                setattr(container_node, "description", container_info["title"])
 
                                 containers[container_info["title"]] = container_node
                             (contained_child, _) = self.create_object(container_node, container_info["parent_field"],
@@ -558,7 +558,7 @@ class ImportSolumina:
                     new_uuid = str(uuid.uuid4())
                     setattr(new_child, "bplElementName", new_uuid)
                     setattr(new_child, "bplElementId", new_uuid)
-                    setattr(new_child, "BPLElementUUID", new_uuid)
+                    setattr(new_child, "bplElementUUID", new_uuid)
 
                     self.make_connector(node, prev_child, new_child)
 
@@ -627,21 +627,21 @@ class ImportSolumina:
             elif len(start_nodes) == 1:
                 start_evt = create_class("StartEvent")
                 setattr(start_evt, "name", "StartEvent")
-                getattr(node, "bPLElements").append(start_evt)
+                getattr(node, "bplElements").append(start_evt)
                 new_uuid = str(uuid.uuid4())
                 setattr(start_evt, "bplElementName", new_uuid)
                 setattr(start_evt, "bplElementId", new_uuid)
-                setattr(start_evt, "BPLElementUUID", new_uuid)
+                setattr(start_evt, "bplElementUUID", new_uuid)
 
                 self.make_connector(node, start_evt, added_children[start_nodes.pop()][0])
 
             end_evt = create_class("EndEvent")
             setattr(end_evt, "name", "EndEvent")
-            getattr(node, "bPLElements").append(end_evt)
+            getattr(node, "bplElements").append(end_evt)
             new_uuid = str(uuid.uuid4())
             setattr(end_evt, "bplElementName", new_uuid)
             setattr(end_evt, "bplElementId", new_uuid)
-            setattr(end_evt, "BPLElementUUID", new_uuid)
+            setattr(end_evt, "bplElementUUID", new_uuid)
 
             for end_src in end_nodes:
                 self.make_connector(node, added_children[end_src][0], end_evt)
@@ -687,7 +687,7 @@ class ImportSolumina:
         new_uuid = str(uuid.uuid4())
         setattr(data_coll_ok_out, "bplElementName", new_uuid)
         setattr(data_coll_ok_out, "bplElementId", new_uuid)
-        setattr(data_coll_ok_out, "BPLElementUUID", new_uuid)
+        setattr(data_coll_ok_out, "bplElementUUID", new_uuid)
         setattr(data_coll_ok_out, "name", "dataCollectionOkay")
         setattr(data_coll_ok_out, "paramName", "dataCollectionOkay")
         setattr(data_coll_ok_out, "paramType", "boolean")
@@ -695,19 +695,19 @@ class ImportSolumina:
 
         prev_child = create_class("StartEvent")
         setattr(prev_child, "name", "StartEvent")
-        getattr(parent, "bPLElements").append(prev_child)
+        getattr(parent, "bplElements").append(prev_child)
         new_uuid = str(uuid.uuid4())
         setattr(prev_child, "bplElementName", new_uuid)
         setattr(prev_child, "bplElementId", new_uuid)
-        setattr(prev_child, "BPLElementUUID", new_uuid)
+        setattr(prev_child, "bplElementUUID", new_uuid)
 
         new_child = create_class("DataCollectionTask")
-        getattr(parent, "bPLElements").append(new_child)
+        getattr(parent, "bplElements").append(new_child)
         new_uuid = str(uuid.uuid4())
         setattr(new_child, "bplElementName", new_uuid)
         setattr(new_child, "bplElementId", new_uuid)
-        setattr(new_child, "BPLElementUUID", new_uuid)
-        setattr(new_child, "Description", "Enter "+getattr(parent_obj, "DAT_COL_TITLE")+" Value")
+        setattr(new_child, "bplElementUUID", new_uuid)
+        setattr(new_child, "description", "Enter "+getattr(parent_obj, "DAT_COL_TITLE")+" Value")
 
         limit_cols = ["PLAN_ID", "OPER_KEY", "STEP_KEY", "STEP_UPDT_NO", "DAT_COL_ID"]
         columns = []
@@ -729,19 +729,19 @@ class ImportSolumina:
         prev_child = new_child
 
         new_child = create_class("Exclusive")
-        getattr(parent, "bPLElements").append(new_child)
+        getattr(parent, "bplElements").append(new_child)
         new_uuid = str(uuid.uuid4())
         setattr(new_child, "bplElementName", new_uuid)
         setattr(new_child, "bplElementId", new_uuid)
-        setattr(new_child, "BPLElementUUID", new_uuid)
-        setattr(new_child, "Description", "Is "+getattr(parent_obj, "DAT_COL_TITLE")+" within spec")
+        setattr(new_child, "bplElementUUID", new_uuid)
+        setattr(new_child, "description", "Is "+getattr(parent_obj, "DAT_COL_TITLE")+" within spec")
 
         data_coll_ok_in = create_class("InputParameter")
         getattr(parent, "parameters").append(data_coll_ok_in)
         new_uuid = str(uuid.uuid4())
         setattr(data_coll_ok_in, "bplElementName", new_uuid)
         setattr(data_coll_ok_in, "bplElementId", new_uuid)
-        setattr(data_coll_ok_in, "BPLElementUUID", new_uuid)
+        setattr(data_coll_ok_in, "bplElementUUID", new_uuid)
         setattr(data_coll_ok_in, "name", "dataCollectionOkay")
         setattr(data_coll_ok_in, "paramName", "dataCollectionOkay")
         setattr(data_coll_ok_in, "paramType", "boolean")
@@ -752,22 +752,22 @@ class ImportSolumina:
 
         end_event = create_class("EndEvent")
         setattr(end_event, "name", "EndEvent")
-        getattr(parent, "bPLElements").append(end_event)
+        getattr(parent, "bplElements").append(end_event)
         new_uuid = str(uuid.uuid4())
         setattr(end_event, "bplElementName", new_uuid)
         setattr(end_event, "bplElementId", new_uuid)
-        setattr(end_event, "BPLElementUUID", new_uuid)
+        setattr(end_event, "bplElementUUID", new_uuid)
 
         self.make_connector(parent, prev_child, end_event, output="Yes -> dataCollectionOkay=True",
                             condition_expression="dataCollectionOkay")
 
         error_event = create_class("ErrorEvent")
-        getattr(parent, "bPLElements").append(new_child)
+        getattr(parent, "bplElements").append(new_child)
         setattr(error_event, "name", "ErrorEvent")
         new_uuid = str(uuid.uuid4())
         setattr(error_event, "bplElementName", new_uuid)
         setattr(error_event, "bplElementId", new_uuid)
-        setattr(error_event, "BPLElementUUID", new_uuid)
+        setattr(error_event, "bplElementUUID", new_uuid)
 
         self.make_connector(parent, prev_child, error_event, output="No -> dataCollectionOkay=False",
                             condition_expression="!dataCollectionOkay")
@@ -776,29 +776,29 @@ class ImportSolumina:
     def create_buyoff(self, parent, parent_obj, parent_info, plan_table, object_id_table):
         prev_child = create_class("StartEvent")
         setattr(prev_child, "name", "StartEvent")
-        getattr(parent, "bPLElements").append(prev_child)
+        getattr(parent, "bplElements").append(prev_child)
         new_uuid = str(uuid.uuid4())
         setattr(prev_child, "bplElementName", new_uuid)
         setattr(prev_child, "bplElementId", new_uuid)
-        setattr(prev_child, "BPLElementUUID", new_uuid)
+        setattr(prev_child, "bplElementUUID", new_uuid)
 
         buyoff_task = create_class("UserTask")
         setattr(buyoff_task, "name", "BuyoffTask")
-        getattr(parent, "bPLElements").append(buyoff_task)
+        getattr(parent, "bplElements").append(buyoff_task)
         new_uuid = str(uuid.uuid4())
         setattr(buyoff_task, "bplElementName", new_uuid)
         setattr(buyoff_task, "bplElementId", new_uuid)
-        setattr(buyoff_task, "BPLElementUUID", new_uuid)
+        setattr(buyoff_task, "bplElementUUID", new_uuid)
 
         self.make_connector(parent, prev_child, buyoff_task)
 
         end_event = create_class("EndEvent")
         setattr(end_event, "name", "EndEvent")
-        getattr(parent, "bPLElements").append(end_event)
+        getattr(parent, "bplElements").append(end_event)
         new_uuid = str(uuid.uuid4())
         setattr(end_event, "bplElementName", new_uuid)
         setattr(end_event, "bplElementId", new_uuid)
-        setattr(end_event, "BPLElementUUID", new_uuid)
+        setattr(end_event, "bplElementUUID", new_uuid)
 
         self.make_connector(parent, buyoff_task, end_event)
 
@@ -808,7 +808,7 @@ class ImportSolumina:
         new_uuid = str(uuid.uuid4())
         setattr(data_coll_ok_in, "bplElementName", new_uuid)
         setattr(data_coll_ok_in, "bplElementId", new_uuid)
-        setattr(data_coll_ok_in, "BPLElementUUID", new_uuid)
+        setattr(data_coll_ok_in, "bplElementUUID", new_uuid)
         setattr(data_coll_ok_in, "name", "dataCollectionOkay")
         setattr(data_coll_ok_in, "paramName", "dataCollectionOkay")
         setattr(data_coll_ok_in, "paramType", "boolean")
@@ -819,7 +819,7 @@ class ImportSolumina:
         new_uuid = str(uuid.uuid4())
         setattr(buyoff_ok_out, "bplElementName", new_uuid)
         setattr(buyoff_ok_out, "bplElementId", new_uuid)
-        setattr(buyoff_ok_out, "BPLElementUUID", new_uuid)
+        setattr(buyoff_ok_out, "bplElementUUID", new_uuid)
         setattr(buyoff_ok_out, "name", "buyoffOkay")
         setattr(buyoff_ok_out, "paramName", "buyoffOkay")
         setattr(buyoff_ok_out, "paramType", "boolean")
@@ -827,36 +827,36 @@ class ImportSolumina:
 
         prev_child = create_class("StartEvent")
         setattr(prev_child, "name", "StartEvent")
-        getattr(parent, "bPLElements").append(prev_child)
+        getattr(parent, "bplElements").append(prev_child)
         new_uuid = str(uuid.uuid4())
         setattr(prev_child, "bplElementName", new_uuid)
         setattr(prev_child, "bplElementId", new_uuid)
-        setattr(prev_child, "BPLElementUUID", new_uuid)
+        setattr(prev_child, "bplElementUUID", new_uuid)
 
         end_event = create_class("EndEvent")
 
         setattr(end_event, "name", "EndEvent")
-        getattr(parent, "bPLElements").append(end_event)
+        getattr(parent, "bplElements").append(end_event)
         new_uuid = str(uuid.uuid4())
         setattr(end_event, "bplElementName", new_uuid)
         setattr(end_event, "bplElementId", new_uuid)
-        setattr(end_event, "BPLElementUUID", new_uuid)
+        setattr(end_event, "bplElementUUID", new_uuid)
 
         gateway = create_class("Exclusive")
-        getattr(parent, "bPLElements").append(gateway)
+        getattr(parent, "bplElements").append(gateway)
         new_uuid = str(uuid.uuid4())
         setattr(gateway, "name", "Exclusive")
         setattr(gateway, "bplElementName", new_uuid)
         setattr(gateway, "bplElementId", new_uuid)
-        setattr(gateway, "BPLElementUUID", new_uuid)
-        setattr(gateway, "Description", "dataCollectionOkay==True?")
+        setattr(gateway, "bplElementUUID", new_uuid)
+        setattr(gateway, "description", "dataCollectionOkay==True?")
 
         self.make_connector(parent, prev_child, gateway)
 
         self.make_connector(parent, gateway, end_event, output="No -> buyoffSuccessful=False",
                             condition_expression="!dataCollectionOkay")
 
-        getattr(parent, "bPLElements").append(end_event)
+        getattr(parent, "bplElements").append(end_event)
         buyoffs = self.query("SFPL_STEP_BUYOFF", [
             ("PLAN_ID", getattr(parent_obj, "PLAN_ID")),
             ("OPER_KEY", getattr(parent_obj, "OPER_KEY")),
@@ -869,7 +869,7 @@ class ImportSolumina:
         elif len(buyoffs) == 1:
             (new_child, siblings) = self.create_object(parent, None, buyoffs[0], "SFPL_STEP_BUYOFF",
                                                        plan_table, object_id_table, [])
-            getattr(parent, "bPLElements").append(new_child)
+            getattr(parent, "bplElements").append(new_child)
             self.make_connector(parent, gateway, new_child, output="buyoffSuccessful")
             self.make_connector(parent, new_child, end_event, output="buyoffSuccessful")
 
@@ -878,36 +878,36 @@ class ImportSolumina:
             new_uuid = str(uuid.uuid4())
             setattr(buyoff_ok, "bplElementName", new_uuid)
             setattr(buyoff_ok, "bplElementId", new_uuid)
-            setattr(buyoff_ok, "BPLElementUUID", new_uuid)
+            setattr(buyoff_ok, "bplElementUUID", new_uuid)
             setattr(buyoff_ok, "name", getattr(buyoffs[0], "BUYOFF_TYPE") + "BuyoffOkay")
             setattr(buyoff_ok, "paramName", getattr(buyoffs[0], "BUYOFF_TYPE") + "BuyoffOkay")
             setattr(buyoff_ok, "paramType", "boolean")
             setattr(buyoff_ok, "scriptFormat", "javascript")
         else:
             fork = create_class("Parallel")
-            getattr(parent, "bPLElements").append(fork)
+            getattr(parent, "bplElements").append(fork)
             new_uuid = str(uuid.uuid4())
             setattr(fork, "name", "BuyoffStart")
             setattr(fork, "bplElementName", new_uuid)
             setattr(fork, "bplElementId", new_uuid)
-            setattr(fork, "BPLElementUUID", new_uuid)
-            setattr(fork, "Description", "Start Buyoffs")
+            setattr(fork, "bplElementUUID", new_uuid)
+            setattr(fork, "description", "Start Buyoffs")
 
             self.make_connector(parent, gateway, fork)
 
             join = create_class("Inclusive")
-            getattr(parent, "bPLElements").append(fork)
+            getattr(parent, "bplElements").append(fork)
             new_uuid = str(uuid.uuid4())
             setattr(join, "name", "BuyoffFinish")
             setattr(join, "bplElementName", new_uuid)
             setattr(join, "bplElementId", new_uuid)
-            setattr(join, "BPLElementUUID", new_uuid)
-            setattr(join, "Description", "Finish Buyoffs")
+            setattr(join, "bplElementUUID", new_uuid)
+            setattr(join, "description", "Finish Buyoffs")
 
             for buyoff in buyoffs:
                 (new_child, siblings) = self.create_object(parent, None, buyoff, "SFPL_STEP_BUYOFF",
                                                            plan_table, object_id_table, {})
-                getattr(parent, "bPLElements").append(new_child)
+                getattr(parent, "bplElements").append(new_child)
                 self.make_connector(parent, fork, new_child)
                 self.make_connector(parent, new_child, join)
 
@@ -917,7 +917,7 @@ class ImportSolumina:
                 new_uuid = str(uuid.uuid4())
                 setattr(buyoff_ok, "bplElementName", new_uuid)
                 setattr(buyoff_ok, "bplElementId", new_uuid)
-                setattr(buyoff_ok, "BPLElementUUID", new_uuid)
+                setattr(buyoff_ok, "bplElementUUID", new_uuid)
                 setattr(buyoff_ok, "name", getattr(buyoff, "BUYOFF_TYPE")+"BuyoffOkay")
                 setattr(buyoff_ok, "paramName", getattr(buyoff, "BUYOFF_TYPE")+"BuyoffOkay")
                 setattr(buyoff_ok, "paramType", "boolean")
