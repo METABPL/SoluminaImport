@@ -1,5 +1,5 @@
 from xml.dom import minidom, Node
-from class_defs import *
+from .class_defs import *
 
 def get_element_text(parent, element_name):
     children = parent.getElementsByTagName(element_name)

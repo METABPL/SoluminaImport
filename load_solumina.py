@@ -1,10 +1,11 @@
 import uuid
 import re
+import sys
 
-from ingester import (load_plan, load_plan_from_string)
-from class_model import *
+from .ingester import (load_plan, load_plan_from_string)
+from .class_model import *
 
-classmodel = __import__("class_model")
+classmodel = sys.modules[FCO.__module__]
 
 embedded_re = re.compile(".*TextObject[(].*OBJECT_ID=([^,]*),.*")
 
