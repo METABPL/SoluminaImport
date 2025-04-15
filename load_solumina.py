@@ -1,6 +1,7 @@
 import uuid
 import re
 import sys
+import os
 
 from .ingester import (load_plan, load_plan_from_string)
 from .class_model import *
@@ -943,4 +944,5 @@ def load_process(filename):
 
     plan_table = load_plan(filename)
     process = importer.import_plan(plan_table, filename)
+    process.source = os.path.basename(filename)
     return process
