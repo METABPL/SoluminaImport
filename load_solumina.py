@@ -353,6 +353,8 @@ class ImportSolumina:
 
     def query(self, table_name, columns, plan_table):
         matches = []
+        if table_name not in plan_table:
+            return matches
         for obj in plan_table[table_name]:
             found = True
             for column in columns:
