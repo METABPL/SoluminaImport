@@ -6,13 +6,13 @@ class FCO:
         self.documentations: list["Documentation"] = []
 
 
-class BPLELementBase(FCO):
+class BPLElementBase(FCO):
     def __init__(self):
         super().__init__()
         self.bplElementUUID: str = "" # Universally Unique Identifier of the BPL Element
 
 
-class BPLElement(BPLELementBase):
+class BPLElement(BPLElementBase):
     def __init__(self):
         super().__init__()
         self.bplElementName: str = "" 
@@ -36,7 +36,7 @@ class Activity(BPLElement):
         super().__init__()
         self.textAnnotation: str = "" 
         self.intermediateEvents: list["IntermediateEvent"] = []
-        self.nexts: dict[str, "BPLElement"] = {}
+        self.nexts: list["ConnectionBase"] = []
         self.prevs: list["BPLElement"] = []
 
 
@@ -59,7 +59,7 @@ class ReceiveTask(Task):
 class Event(BPLElement):
     def __init__(self):
         super().__init__()
-        self.nexts: dict[str, "BPLElement"] = {}
+        self.nexts: list["ConnectionBase"] = []
         self.prevs: list["BPLElement"] = []
 
 
@@ -68,7 +68,7 @@ class ErrorEvent(Event):
         super().__init__()
 
 
-class Value(BPLELementBase):
+class Value(BPLElementBase):
     def __init__(self):
         super().__init__()
         self.target: str = "" 
@@ -85,6 +85,10 @@ class ConnectionBase(BPLElement):
         super().__init__()
         self.output: str = "" 
         self.conditionExpression: str = "" 
+        self.src: str = "" 
+        self.dst: str = "" 
+        self.fromNode: BplElement = "" 
+        self.toNode: BplElement = "" 
 
 
 class Event2Activity(ConnectionBase):
@@ -92,7 +96,7 @@ class Event2Activity(ConnectionBase):
         super().__init__()
 
 
-class DataOutputAssoc(BPLELementBase):
+class DataOutputAssoc(BPLElementBase):
     def __init__(self):
         super().__init__()
         self.dsTargetRef: str = "" 
@@ -142,7 +146,7 @@ class Gateway(BPLElement):
     def __init__(self):
         super().__init__()
         self.fault: list["Fault"] = []
-        self.nexts: dict[str, "BPLElement"] = {}
+        self.nexts: list["ConnectionBase"] = []
         self.prevs: list["BPLElement"] = []
 
 
@@ -215,12 +219,13 @@ class IntermediateEvent(Event):
         super().__init__()
         self.iconColor: str = "" 
         self.linkEventDefinitions: list["LinkEventDefinition"] = []
-        self.nexts: dict[str, "BPLElement"] = {}
+        self.nexts: list["ConnectionBase"] = []
 
 
-class Process(BPLELementBase):
+class Process(BPLElementBase):
     def __init__(self):
         super().__init__()
+        self.tdp: str = "" 
         self.source: str = "" # Describes where the process plan came from. It could be the filename, database table name, etc.
         self.classification: str = "" 
         self.bplProcessName: str = "" 
@@ -249,13 +254,13 @@ class Complex(Sequential):
 class Artifact(BPLElement):
     def __init__(self):
         super().__init__()
-        self.nexts: dict[str, "BPLElement"] = {}
+        self.nexts: list["ConnectionBase"] = []
 
 
 class Annotation(Artifact):
     def __init__(self):
         super().__init__()
-        self.nexts: dict[str, "BPLElement"] = {}
+        self.nexts: list["ConnectionBase"] = []
 
 
 class BPMNFolder(FCO):
@@ -272,7 +277,7 @@ class BPMNFolder(FCO):
         self.humans: list["Human"] = []
 
 
-class Lane(BPLELementBase):
+class Lane(BPLElementBase):
     def __init__(self):
         super().__init__()
 
@@ -347,7 +352,7 @@ class ScriptTask(Task):
         self.scriptFormat: str = "" # Format of the Script
 
 
-class Parameter(BPLELementBase):
+class Parameter(BPLElementBase):
     def __init__(self):
         super().__init__()
         self.scriptFormat: str = "" 
@@ -369,7 +374,7 @@ class OutputParameter(Parameter):
         super().__init__()
 
 
-class ExtensionElements(BPLELementBase):
+class ExtensionElements(BPLElementBase):
     def __init__(self):
         super().__init__()
         self.connectorId: str = "" 
@@ -394,7 +399,7 @@ class UserTask(Task):
         self.formRef: str = "" # Name of the form file (without the filename extension such as .json)
         self.stepInstructions: list["StepInstructions"] = []
         self.extensionElements: list["ExtensionElements"] = []
-        self.nexts: dict[str, "BPLElement"] = {}
+        self.nexts: list["ConnectionBase"] = []
 
 
 class SpecAnnotation(BPLElement):
@@ -407,7 +412,7 @@ class SpecAnnotation(BPLElement):
         self.specDesc: str = "" # Textual description of the specification as found in the document
         self.specLocator: str = "" # Section number or ID of the specification within the specified document
         self.docLocator: str = "" # ID or Filename of the document containing the specification
-        self.nexts: dict[str, "BPLElement"] = {}
+        self.nexts: list["ConnectionBase"] = []
 
 
 class SpecConn(ConnectionBase):
@@ -415,7 +420,7 @@ class SpecConn(ConnectionBase):
         super().__init__()
 
 
-class KeyValue(BPLELementBase):
+class KeyValue(BPLElementBase):
     def __init__(self):
         super().__init__()
         self.value: str = "" # Value of the key-value entry
@@ -436,7 +441,7 @@ class SendTask(Task):
         self.expression: str = "" 
 
 
-class Property(BPLELementBase):
+class Property(BPLElementBase):
     def __init__(self):
         super().__init__()
         self.propertyName: str = "" 
@@ -450,7 +455,7 @@ class BusinessRuleTask(Task):
         self.decisionRef: str = "" 
         self.resultVariable: str = "" 
         self.extensionElements: list["ExtensionElements"] = []
-        self.nexts: dict[str, "BPLElement"] = {}
+        self.nexts: list["ConnectionBase"] = []
 
 
 class AnnotationConn(ConnectionBase):
@@ -458,19 +463,19 @@ class AnnotationConn(ConnectionBase):
         super().__init__()
 
 
-class InformationRequirement(BPLELementBase):
+class InformationRequirement(BPLElementBase):
     def __init__(self):
         super().__init__()
         self.requiredInputs: list["RequiredInput"] = []
 
 
-class RequiredInput(BPLELementBase):
+class RequiredInput(BPLElementBase):
     def __init__(self):
         super().__init__()
         self.href: str = "" 
 
 
-class DecisionTable(BPLELementBase):
+class DecisionTable(BPLElementBase):
     def __init__(self):
         super().__init__()
         self.hitPolicy: str = "" 
@@ -478,20 +483,20 @@ class DecisionTable(BPLELementBase):
         self.decisionOutputs: list["DecisionOutput"] = []
 
 
-class DecisionOutput(BPLELementBase):
+class DecisionOutput(BPLElementBase):
     def __init__(self):
         super().__init__()
         self.typeRef: str = "" 
         self.label: str = "" 
 
 
-class DecisionRule(BPLELementBase):
+class DecisionRule(BPLElementBase):
     def __init__(self):
         super().__init__()
         self.decisionOutputEntrys: list["DecisionOutputEntry"] = []
 
 
-class DecisionOutputEntry(BPLELementBase):
+class DecisionOutputEntry(BPLElementBase):
     def __init__(self):
         super().__init__()
         self.text: str = "" 
@@ -502,7 +507,7 @@ class DataStoreReference(BPLElement):
         super().__init__()
 
 
-class MultiInstanceLoopCharacteristics(BPLELementBase):
+class MultiInstanceLoopCharacteristics(BPLElementBase):
     def __init__(self):
         super().__init__()
         self.collection: str = "" 
@@ -524,13 +529,14 @@ class BoundaryEvent(Event):
         self.timeDuration: str = "" 
 
 
-class ResourceRequirement(BPLELementBase):
+class ResourceRequirement(BPLElementBase):
     def __init__(self):
         super().__init__()
+        self.resourceRequirements: list["ResourceRequirement"] = []
         self.resourceBases: list["ResourceBase"] = []
 
 
-class ResourceBase(BPLELementBase):
+class ResourceBase(BPLElementBase):
     def __init__(self):
         super().__init__()
         self.quantity: int = 0 
@@ -564,7 +570,7 @@ class HumanResource(NonConsumableResource):
         self.roleRefs: list["RoleRef"] = []
 
 
-class Decision(BPLELementBase):
+class Decision(BPLElementBase):
     def __init__(self):
         super().__init__()
         self.decisionId: str = "" 
@@ -572,7 +578,7 @@ class Decision(BPLELementBase):
         self.informationRequirements: list["InformationRequirement"] = []
 
 
-class Form(BPLELementBase):
+class Form(BPLElementBase):
     def __init__(self):
         super().__init__()
         self.formType: str = "" 
@@ -580,7 +586,7 @@ class Form(BPLELementBase):
         self.formFields: list["FormField"] = []
 
 
-class FormField(BPLELementBase):
+class FormField(BPLElementBase):
     def __init__(self):
         super().__init__()
         self.formKey: str = "" 
@@ -593,7 +599,7 @@ class FormField(BPLELementBase):
         self.validationConstraints: list["ValidationConstraint"] = []
 
 
-class ValidationConstraint(BPLELementBase):
+class ValidationConstraint(BPLElementBase):
     def __init__(self):
         super().__init__()
         self.customValidator: str = "" 
@@ -640,14 +646,14 @@ class FormConn(ConnectionBase):
         super().__init__()
 
 
-class FormRef(BPLELementBase):
+class FormRef(BPLElementBase):
     def __init__(self):
         super().__init__()
         self.form: "Form|None" = None
         self.prevs: list["BPLElement"] = []
 
 
-class DecisionRef(BPLELementBase):
+class DecisionRef(BPLElementBase):
     def __init__(self):
         super().__init__()
         self.decision: "Decision|None" = None
@@ -659,7 +665,7 @@ class DecisionConn(ConnectionBase):
         super().__init__()
 
 
-class LinkEventDefinition(BPLELementBase):
+class LinkEventDefinition(BPLElementBase):
     def __init__(self):
         super().__init__()
         self.bplElementName: str = "" 
@@ -674,16 +680,19 @@ class OutValue(Value):
 class BuyoffTask(UserTask):
     def __init__(self):
         super().__init__()
+        self.buyoffStatus: str = "" 
+        self.buyoffType: str = "" 
         self.cert: str = "" # The certificate necessary for completing this buyoff task
 
 
 class DataCollectionTask(UserTask):
     def __init__(self):
         super().__init__()
+        self.upperLimit: str = "" 
+        self.targetValue: str = "" 
+        self.lowerLimit: str = "" 
+        self.unitOfMeasure: str = "" 
         self.action: str = "" 
-        self.target_value: str = "" 
-        self.lower_limit: str = "" 
-        self.upper_limit: str = "" 
         self.resourceBaseRefs: list["ResourceBaseRef"] = []
 
 
@@ -698,13 +707,13 @@ class Footer(SubProcess):
         self.inspectionTasks: list["InspectionTask"] = []
 
 
-class DataCollectionHistory(BPLELementBase):
+class DataCollectionHistory(BPLElementBase):
     def __init__(self):
         super().__init__()
         self.dataEntrys: list["DataEntry"] = []
 
 
-class DataEntry(BPLELementBase):
+class DataEntry(BPLElementBase):
     def __init__(self):
         super().__init__()
         self.entryNumber: int = 0 # Ordered number of the data entry
@@ -716,7 +725,7 @@ class DataCollection(SubProcess):
         super().__init__()
 
 
-class StepInstructions(BPLELementBase):
+class StepInstructions(BPLElementBase):
     def __init__(self):
         super().__init__()
         self.objectID: str = "" 
