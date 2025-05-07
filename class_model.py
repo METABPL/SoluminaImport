@@ -3,6 +3,7 @@ class FCO:
         self.name: str = "" 
         self.x: int = 0   # x coordinate
         self.y: int = 0   # y coordinate
+        self.parent : FCO|None = None
         self.documentations: list["Documentation"] = []
 
 

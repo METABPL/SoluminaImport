@@ -524,6 +524,8 @@ class ImportSolumina:
         node = create_class(object_info["type"])
         if parent is not None and parent_field is not None:
             getattr(parent, parent_field).append(node)
+        if parent is not None:
+            node.parent = parent
 
         if "positioning" in object_info:
             positioning = object_info["positioning"]
