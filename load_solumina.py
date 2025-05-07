@@ -217,9 +217,9 @@ translate_table = {
     "SFPL_OPER_SKILL": {
         "type": "HumanResource",
         "attributes": {
-            "bplElementName": "$uuid",
-            "bplElementId": "$uuid",
-            "bplElementUUID": "$uuid",
+            "bplElementName": "${PLAN_ID}_${OPER_KEY}_${clean(SKILL_CATEGORY)}",
+            "bplElementId": "${PLAN_ID}_${OPER_KEY}_${clean(SKILL_CATEGORY)}",
+            "bplElementUUID": "${PLAN_ID}_${OPER_KEY}_${clean(SKILL_CATEGORY)}",
             "description": "SKILL_CATEGORY",
             "name": "SKILL_CATEGORY",
         },
@@ -229,8 +229,8 @@ translate_table = {
         "type": "ConsumableResource",
         "attributes": {
             "bplElementName": "PART_NO",
-            "bplElementId": "$uuid",
-            "bplElementUUID": "$uuid",
+            "bplElementId": "${PLAN_ID}_${OPER_KEY}_${STEP_KEY}_${PART_DAT_COL_ID}",
+            "bplElementUUID": "${PLAN_ID}_${OPER_KEY}_${STEP_KEY}_${PART_DAT_COL_ID}",
             "description": "PART_TITLE",
             "name": "PART_TITLE",
             "quantity": "ITEM_QTY",
@@ -253,9 +253,9 @@ translate_table = {
     "SFPL_STEP_BUYOFF": {
         "type": "SubProcess",
         "attributes": {
-            "bplElementName": "$uuid",
-            "bplElementId": "$uuid",
-            "bplElementUUID": "$uuid",
+            "bplElementName": "BUYOFF_ID",
+            "bplElementId": "BUYOFF_ID",
+            "bplElementUUID": "BUYOFF_ID",
             "description": "${BUYOFF_TYPE} Buyoff",
             "name": "BUYOFF_TITLE",
             "cert": "BUYOFF_CERT",
@@ -292,6 +292,9 @@ def sort_items(items, keys):
             return dot_at_end(getattr(item, keys))
     items.sort(key=get_key)
 
+def clean(s):
+    return s.replace(" ", "_")
+
 def get_embedded(desc):
     names = []
     start_pos = 0
@@ -309,6 +312,10 @@ def embedded_replace(desc, obj, joins):
     names = get_embedded(desc)
     attr_value = desc
     for name in names:
+        clean_value = False
+        if name.startswith("clean("):
+            clean_value = True
+            name = name[6:len(name)-1]
         col_value = None
         if hasattr(obj, name):
             col_value = getattr(obj, name)
@@ -320,7 +327,11 @@ def embedded_replace(desc, obj, joins):
                     break
             if col_value is None:
                 col_value = ""
-        attr_value = attr_value.replace("${" + name + "}", str(col_value))
+        if clean_value:
+            col_value = clean(col_value)
+            attr_value = attr_value.replace("${clean(" + name + ")}", str(col_value))
+        else:
+            attr_value = attr_value.replace("${" + name + "}", str(col_value))
     return attr_value
 
 
@@ -344,7 +355,7 @@ class ImportSolumina:
 
         if src_type is not None and dst_type is not None:
             connector_node = create_class(src_type + "2" + dst_type)
-            setattr(connector_node, "bplElementUUID", str(uuid.uuid4()))
+            setattr(connector_node, "bplElementUUID", src.bplElementUUID+"_"+dst.bplElementUUID)
             setattr(connector_node, "src", src.bplElementId)
             setattr(connector_node, "dst", dst.bplElementId)
             setattr(connector_node, "fromNode", src)
@@ -587,7 +598,7 @@ class ImportSolumina:
                                     attr_value = next_attr_value
                                 if attr_value is not None:
                                     break
-                        print("{} has no column named {}".format(table_name, text_col))
+#                        print("{} has no column named {}".format(table_name, text_col))
             elif "${" in attr_column:
                 attr_value = embedded_replace(attr_column, obj, joins)
             else:
@@ -626,7 +637,7 @@ class ImportSolumina:
                     prev_child = create_class("StartEvent")
                     getattr(node, child["parent_field"]).append(prev_child)
                     setattr(prev_child, "name", "StartEvent")
-                    new_uuid = str(uuid.uuid4())
+                    new_uuid = node.bplElementUUID + "_Start"
                     setattr(prev_child, "bplElementName", new_uuid)
                     setattr(prev_child, "bplElementId", new_uuid)
                     setattr(prev_child, "bplElementUUID", new_uuid)
@@ -679,7 +690,7 @@ class ImportSolumina:
                                 container_node = create_class(container_info["type"])
                                 setattr(container_node, "name", container_info["title"])
                                 getattr(node, container_info["parent_field"]).append(container_node)
-                                new_uuid = str(uuid.uuid4())
+                                new_uuid = node.bplElementUUID + "_{}".format(container_info[parent_field])
                                 setattr(container_node, "bplElementName", container_info["title"])
                                 setattr(container_node, "bplElementId", new_uuid)
                                 setattr(container_node, "bplElementUUID", new_uuid)
@@ -698,7 +709,8 @@ class ImportSolumina:
                                 elif hasattr(new_child, "bplElementUUID"):
                                     added_children[getattr(new_child, "bplElementUUID")] = (new_child, child_obj,child)
                                 else:
-                                    print("child doesn't have a bplElementId or a bplElementUUID")
+#                                    print("child doesn't have a bplElementId or a bplElementUUID")
+                                    pass
 
                         if new_child is not None and prev_child is not None and self.is_process(node) and "connect" in child and child["connect"]:
                             self.make_connector(node, prev_child, new_child)
@@ -713,7 +725,7 @@ class ImportSolumina:
                 new_child = create_class("EndEvent")
                 setattr(new_child, "name", "EndEvent")
                 getattr(node, child["parent_field"]).append(new_child)
-                new_uuid = str(uuid.uuid4())
+                new_uuid = node.bplElementUUID + "_End"
                 setattr(new_child, "bplElementName", new_uuid)
                 setattr(new_child, "bplElementId", new_uuid)
                 setattr(new_child, "bplElementUUID", new_uuid)
@@ -784,7 +796,7 @@ class ImportSolumina:
                 parallel = create_class("Parallel")
 
                 setattr(parallel, "name", "GW Split")
-                new_uuid = str(uuid.uuid4())
+                new_uuid = node.bplElementUUID + "_GW_Split"
                 setattr(parallel, "bplElementName", new_uuid)
                 setattr(parallel, "bplElementId", new_uuid)
                 setattr(parallel, "bplElementUUID", new_uuid)
@@ -827,7 +839,7 @@ class ImportSolumina:
                     joiner = create_class("Parallel")
 
                     setattr(joiner, "name", "GW Join")
-                    new_uuid = str(uuid.uuid4())
+                    new_uuid = node.bplElementUUID + "_GW_Join"
                     setattr(joiner, "bplElementName", new_uuid)
                     setattr(joiner, "bplElementId", new_uuid)
                     setattr(joiner, "bplElementUUID", new_uuid)
@@ -912,7 +924,7 @@ class ImportSolumina:
                 start_evt = create_class("StartEvent")
                 setattr(start_evt, "name", "StartEvent")
                 getattr(node, "bplElements").append(start_evt)
-                new_uuid = str(uuid.uuid4())
+                new_uuid = node.bplElementUUID + "_Start"
                 setattr(start_evt, "bplElementName", new_uuid)
                 setattr(start_evt, "bplElementId", new_uuid)
                 setattr(start_evt, "bplElementUUID", new_uuid)
@@ -922,15 +934,13 @@ class ImportSolumina:
             end_evt = create_class("EndEvent")
             setattr(end_evt, "name", "EndEvent")
             getattr(node, "bplElements").append(end_evt)
-            new_uuid = str(uuid.uuid4())
+            new_uuid = node.bplElementUUID + "_End"
             setattr(end_evt, "bplElementName", new_uuid)
             setattr(end_evt, "bplElementId", new_uuid)
             setattr(end_evt, "bplElementUUID", new_uuid)
 
             for end_src in end_nodes:
                 self.make_connector(node, added_children[end_src][0], end_evt)
-
-
 
         return (node, self.create_siblings(parent, parent_field, obj, object_info, plan_table, object_id_table))
 
