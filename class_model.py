@@ -146,6 +146,8 @@ class Skill(FCO):
 class Gateway(BPLElement):
     def __init__(self):
         super().__init__()
+        self.decisionType: str = "" 
+        self.decision: str = "" 
         self.fault: list["Fault"] = []
         self.nexts: list["ConnectionBase"] = []
         self.prevs: list["BPLElement"] = []
@@ -548,6 +550,7 @@ class ResourceBase(BPLElementBase):
 class ConsumableResource(ResourceBase):
     def __init__(self):
         super().__init__()
+        self.action: str = "" 
         self.unitType: str = "" 
         self.keyValues: list["KeyValue"] = []
 
@@ -625,6 +628,7 @@ class Activity2Gateway(ConnectionBase):
 class Gateway2Activity(ConnectionBase):
     def __init__(self):
         super().__init__()
+        self.conditionTarget: str = "" 
 
 
 class Event2Gateway(ConnectionBase):
