@@ -356,6 +356,8 @@ class ImportSolumina:
         if src_type is not None and dst_type is not None:
             connector_node = create_class(src_type + "2" + dst_type)
             setattr(connector_node, "bplElementUUID", src.bplElementUUID+"_"+dst.bplElementUUID)
+            setattr(connector_node, "bplElementId", src.bplElementUUID+"_"+dst.bplElementUUID)
+            setattr(connector_node, "bplElementName", src.bplElementUUID+"_"+dst.bplElementUUID)
             setattr(connector_node, "src", src.bplElementId)
             setattr(connector_node, "dst", dst.bplElementId)
             setattr(connector_node, "fromNode", src)
@@ -409,7 +411,7 @@ class ImportSolumina:
             return ("", "")
         if expr.startswith("Else"):
             (ex2, dest) = self.compute_condition_expression(true_path, true_path)
-            if ex2 is not None and ex2 != "":
+            if ex2 is not None:
                 return ("Not("+ex2+")", dest)
             else:
                 return ("", "")
