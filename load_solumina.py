@@ -1018,3 +1018,11 @@ def load_process(filename):
     process = importer.import_plan(plan_table, filename)
     process.source = os.path.basename(filename)
     return process
+
+def load_process_from_string(filename, contents):
+    importer = ImportSolumina()
+    plan_table = load_plan_from_string(contents)
+    process = importer.import_plan(plan_table, filename)
+    process.source = os.path.basename(filename)
+    return process
+
