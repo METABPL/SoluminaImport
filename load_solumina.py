@@ -364,6 +364,8 @@ class ImportSolumina:
 
             if target_op is not None:
                 setattr(connector_node, "conditionTarget", target_op)
+            else:
+                setattr(connector_node, "conditionTarget", "")
 
             if output is not None:
                 setattr(connector_node, "output", output)
@@ -403,9 +405,14 @@ class ImportSolumina:
             return text
 
     def compute_condition_expression(self, expr, true_path):
+        if expr is None or expr == "":
+            return ("", "")
         if expr.startswith("Else"):
             (ex2, dest) = self.compute_condition_expression(true_path, true_path)
-            return ("Not("+ex2+")", dest)
+            if ex2 is not None and ex2 != "":
+                return ("Not("+ex2+")", dest)
+            else:
+                return ("", "")
         if expr.startswith("If "):
             expr = expr[3:]
         condition = None
@@ -949,6 +956,8 @@ class ImportSolumina:
             return []
         created_siblings = []
         for sibling in parent_info["siblings"]:
+            if sibling["table"] not in plan_table:
+                continue
             siblings = plan_table[sibling["table"]][:]
             if "orderBy" in sibling:
                 sort_items(siblings, sibling["orderBy"])
