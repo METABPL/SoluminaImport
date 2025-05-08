@@ -751,7 +751,7 @@ class ImportSolumina:
 
         created_end = False
 
-        if "links" in object_info:
+        if "links" in object_info and object_info["links"]["table"] in plan_table:
             links = object_info["links"]
             cols = []
             for key in links["keys"]:
@@ -987,6 +987,37 @@ class ImportSolumina:
 
             for end_src in end_nodes:
                 self.make_connector(node, added_children[end_src][0], end_evt)
+            created_end = True
+
+        if isinstance(node, Process) and "SFPL_PLAN_LINK" not in plan_table and len(node.bplElements) > 0:
+            node.bplElements = sorted(node.bplElements, key=lambda n: n.bplElementName)
+
+            for i in range(0, len(node.bplElements)-1):
+                self.make_connector(node, node.bplElements[i], node.bplElements[i+1])
+
+            start_evt = create_class("StartEvent")
+            setattr(start_evt, "name", "StartEvent")
+            new_uuid = node.bplElementUUID + "_Start"
+            setattr(start_evt, "bplElementName", new_uuid)
+            setattr(start_evt, "bplElementId", new_uuid)
+            setattr(start_evt, "bplElementUUID", new_uuid)
+            if parent is not None:
+                start_evt.parent = parent
+            created_start = True
+
+            self.make_connector(node, start_evt, node.bplElements[0])
+
+            end_evt = create_class("EndEvent")
+            setattr(end_evt, "name", "EndEvent")
+            new_uuid = node.bplElementUUID + "_End"
+            setattr(end_evt, "bplElementName", new_uuid)
+            setattr(end_evt, "bplElementId", new_uuid)
+            setattr(end_evt, "bplElementUUID", new_uuid)
+            if parent is not None:
+                end_evt.parent = parent
+            self.make_connector(node, node.bplElements[-1], end_evt)
+            node.bplElements.append(start_evt)
+            node.bplElements.append(end_evt)
             created_end = True
 
         if created_start and not created_end:
