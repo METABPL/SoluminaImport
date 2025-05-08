@@ -13,6 +13,7 @@ condition_forms = [
     re.compile("(.*), +go to .*"),
     re.compile("(.*): +proceed to .*"),
     re.compile("(.*) +proceed to .*"),
+    re.compile("(.*) +skip ahead to .*"),
 ]
 
 op_forms = [
@@ -410,9 +411,20 @@ class ImportSolumina:
         if expr is None or expr == "":
             return ("", "")
         if expr.startswith("Else"):
-            (ex2, dest) = self.compute_condition_expression(true_path, true_path)
+            (ex2, _) = self.compute_condition_expression(true_path, true_path)
+            op = None
+            expr = expr[4:]
+            if expr.startswith(","):
+                expr = expr[1:].strip()
+            for op_form in op_forms:
+                matches = op_form.match(expr)
+                if matches is not None:
+                    op = matches.group(1)
+                    while len(op) < 3:
+                        op = "0" + op
+                    break
             if ex2 is not None:
-                return ("Not("+ex2+")", dest)
+                return ("Not("+ex2+")", op)
             else:
                 return ("", "")
         if expr.startswith("If "):
