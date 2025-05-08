@@ -37,7 +37,7 @@ translate_table = {
                             "parent_field": "resourceRequirements", "keys": ["BOM_ID"]},
                            {"table": "SFPL_MFG_BOM_COMP",
                             "parent_field": "resourceRequirements", "keys": ["BOM_ID"]},
-                           {"table": "SFPL_PLAN_NODE", "keys": ["PLAN_ID"],
+                           {"table": "SFPL_PLAN_NODE", "keys": ["PLAN_ID"], "connect": True,
                             "parent_field": "bplElements"}],
                        "links":
                            {"table": "SFPL_PLAN_LINK", "keys": ["PLAN_ID"], "only": ["SFPL_PLAN_NODE"]},
@@ -651,6 +651,7 @@ class ImportSolumina:
 
         created_start = False
         prev_child = None
+        start_parent_field = None
         if "children" in object_info:
             for child in object_info["children"]:
 
@@ -662,7 +663,10 @@ class ImportSolumina:
                     setattr(prev_child, "bplElementName", new_uuid)
                     setattr(prev_child, "bplElementId", new_uuid)
                     setattr(prev_child, "bplElementUUID", new_uuid)
+                    if parent is not None:
+                        prev_child.parent = parent
                     created_start = True
+                    start_parent_field = child["parent_field"]
 
                 child_table = child["table"]
                 if "table" in translate_table[child_table]:
@@ -716,6 +720,8 @@ class ImportSolumina:
                                 setattr(container_node, "bplElementId", new_uuid)
                                 setattr(container_node, "bplElementUUID", new_uuid)
                                 setattr(container_node, "description", container_info["title"])
+                                if parent is not None:
+                                    container_node.parent = parent
 
                                 containers[container_info["title"]] = container_node
                             (contained_child, _) = self.create_object(container_node, child_obj, child["table"], plan_table, object_id_table, added_links)
@@ -745,11 +751,13 @@ class ImportSolumina:
             if created_start:
                 new_child = create_class("EndEvent")
                 setattr(new_child, "name", "EndEvent")
-                getattr(node, child["parent_field"]).append(new_child)
+                getattr(node, start_parent_field).append(new_child)
                 new_uuid = node.bplElementUUID + "_End"
                 setattr(new_child, "bplElementName", new_uuid)
                 setattr(new_child, "bplElementId", new_uuid)
                 setattr(new_child, "bplElementUUID", new_uuid)
+                if parent is not None:
+                    new_child.parent = parent
 
                 self.make_connector(node, prev_child, new_child)
 
@@ -821,6 +829,8 @@ class ImportSolumina:
                 setattr(parallel, "bplElementName", new_uuid)
                 setattr(parallel, "bplElementId", new_uuid)
                 setattr(parallel, "bplElementUUID", new_uuid)
+                if parent is not None:
+                    parallel.parent = parent
 
                 if hasattr(old_src, "x"):
                     parallel.x = old_src.x
@@ -864,6 +874,8 @@ class ImportSolumina:
                     setattr(joiner, "bplElementName", new_uuid)
                     setattr(joiner, "bplElementId", new_uuid)
                     setattr(joiner, "bplElementUUID", new_uuid)
+                    if parent is not None:
+                        joiner.parent = parent
 
                     if hasattr(old_dst, "x"):
                         joiner.x = old_dst.x
@@ -938,30 +950,33 @@ class ImportSolumina:
                         if src_id in end_nodes:
                             end_nodes.remove(src_id)
 
-            if len(start_nodes) != 1 and len(added_links) > 0:
-#                print("Error - there should be only one start node")
-                pass
-            elif len(start_nodes) == 1:
-                start_evt = create_class("StartEvent")
-                setattr(start_evt, "name", "StartEvent")
-                getattr(node, "bplElements").append(start_evt)
-                new_uuid = node.bplElementUUID + "_Start"
-                setattr(start_evt, "bplElementName", new_uuid)
-                setattr(start_evt, "bplElementId", new_uuid)
-                setattr(start_evt, "bplElementUUID", new_uuid)
-
-                self.make_connector(node, start_evt, added_children[start_nodes.pop()][0])
-
-            end_evt = create_class("EndEvent")
-            setattr(end_evt, "name", "EndEvent")
-            getattr(node, "bplElements").append(end_evt)
-            new_uuid = node.bplElementUUID + "_End"
-            setattr(end_evt, "bplElementName", new_uuid)
-            setattr(end_evt, "bplElementId", new_uuid)
-            setattr(end_evt, "bplElementUUID", new_uuid)
-
-            for end_src in end_nodes:
-                self.make_connector(node, added_children[end_src][0], end_evt)
+#            if len(start_nodes) != 1 and len(added_links) > 0:
+#                pass
+#            elif len(start_nodes) == 1:
+#                start_evt = create_class("StartEvent")
+#                setattr(start_evt, "name", "StartEvent")
+#                getattr(node, "bplElements").append(start_evt)
+#                new_uuid = node.bplElementUUID + "_Start"
+#                setattr(start_evt, "bplElementName", new_uuid)
+#                setattr(start_evt, "bplElementId", new_uuid)
+#                setattr(start_evt, "bplElementUUID", new_uuid)
+#                if parent is not None:
+#                    start_evt.parent = parent
+#
+#                self.make_connector(node, start_evt, added_children[start_nodes.pop()][0])
+#
+#            end_evt = create_class("EndEvent")
+#            setattr(end_evt, "name", "EndEvent")
+#            getattr(node, "bplElements").append(end_evt)
+#            new_uuid = node.bplElementUUID + "_End"
+#            setattr(end_evt, "bplElementName", new_uuid)
+#            setattr(end_evt, "bplElementId", new_uuid)
+#            setattr(end_evt, "bplElementUUID", new_uuid)
+#            if parent is not None:
+#                end_evt.parent = parent
+#
+#            for end_src in end_nodes:
+#                self.make_connector(node, added_children[end_src][0], end_evt)
 
         return (node, self.create_siblings(parent, parent_field, obj, object_info, plan_table, object_id_table))
 
@@ -1018,11 +1033,3 @@ def load_process(filename):
     process = importer.import_plan(plan_table, filename)
     process.source = os.path.basename(filename)
     return process
-
-def load_process_from_string(filename, contents):
-    importer = ImportSolumina()
-    plan_table = load_plan_from_string(contents)
-    process = importer.import_plan(plan_table, filename)
-    process.source = os.path.basename(filename)
-    return process
-
