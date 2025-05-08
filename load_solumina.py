@@ -821,6 +821,7 @@ class ImportSolumina:
                 setattr(parallel, "bplElementUUID", new_uuid)
                 if parent is not None:
                     parallel.parent = parent
+                    parent.bplElements.add(parallel)
 
                 if hasattr(old_src, "x"):
                     parallel.x = old_src.x
@@ -866,6 +867,7 @@ class ImportSolumina:
                     setattr(joiner, "bplElementUUID", new_uuid)
                     if parent is not None:
                         joiner.parent = parent
+                        parent.bplElements.add(joiner)
 
                     if hasattr(old_dst, "x"):
                         joiner.x = old_dst.x
