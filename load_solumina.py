@@ -37,7 +37,7 @@ translate_table = {
                             "parent_field": "resourceRequirements", "keys": ["BOM_ID"]},
                            {"table": "SFPL_MFG_BOM_COMP",
                             "parent_field": "resourceRequirements", "keys": ["BOM_ID"]},
-                           {"table": "SFPL_PLAN_NODE", "keys": ["PLAN_ID"], "connect": True,
+                           {"table": "SFPL_PLAN_NODE", "keys": ["PLAN_ID"],
                             "parent_field": "bplElements"}],
                        "links":
                            {"table": "SFPL_PLAN_LINK", "keys": ["PLAN_ID"], "only": ["SFPL_PLAN_NODE"]},
@@ -363,6 +363,8 @@ class ImportSolumina:
             setattr(connector_node, "dst", dst.bplElementId)
             setattr(connector_node, "fromNode", src)
             setattr(connector_node, "toNode", dst)
+            if parent is not None:
+                connector_node.parent = parent
             src.nexts.append(connector_node)
 
             if target_op is not None:
@@ -655,7 +657,7 @@ class ImportSolumina:
         if "children" in object_info:
             for child in object_info["children"]:
 
-                if self.is_process(node) and "connect" in child and child["connect"] and not created_start:
+                if self.is_process(node) and "connect" in child and child["connect"]:
                     prev_child = create_class("StartEvent")
                     getattr(node, child["parent_field"]).append(prev_child)
                     setattr(prev_child, "name", "StartEvent")
@@ -747,19 +749,7 @@ class ImportSolumina:
                                 self.make_connector(node, prev_child, sibling)
                                 prev_child = sibling
 
-
-            if created_start:
-                new_child = create_class("EndEvent")
-                setattr(new_child, "name", "EndEvent")
-                getattr(node, start_parent_field).append(new_child)
-                new_uuid = node.bplElementUUID + "_End"
-                setattr(new_child, "bplElementName", new_uuid)
-                setattr(new_child, "bplElementId", new_uuid)
-                setattr(new_child, "bplElementUUID", new_uuid)
-                if parent is not None:
-                    new_child.parent = parent
-
-                self.make_connector(node, prev_child, new_child)
+        created_end = False
 
         if "links" in object_info:
             links = object_info["links"]
@@ -884,6 +874,8 @@ class ImportSolumina:
                     self.make_connector(node, joiner, old_dst)
                     alternate_dst[best_dst] = joiner
 
+            min_x_src = None
+            min_x = None
             for link in matching_links:
                 src_id = getattr(link, link_info["src"])
                 dst_id = getattr(link, link_info["dst"])
@@ -896,6 +888,10 @@ class ImportSolumina:
 
                 src_node = added_children[src_id][0]
                 dst_node = added_children[dst_id][0]
+
+                if hasattr(src_node, "x") and (min_x is None or src_node.x < min_x):
+                    min_x_src = src_node
+                    min_x = src_node.x
 
                 if dst_id in start_nodes:
                     start_nodes.remove(dst_id)
@@ -950,33 +946,58 @@ class ImportSolumina:
                         if src_id in end_nodes:
                             end_nodes.remove(src_id)
 
-#            if len(start_nodes) != 1 and len(added_links) > 0:
-#                pass
-#            elif len(start_nodes) == 1:
-#                start_evt = create_class("StartEvent")
-#                setattr(start_evt, "name", "StartEvent")
-#                getattr(node, "bplElements").append(start_evt)
-#                new_uuid = node.bplElementUUID + "_Start"
-#                setattr(start_evt, "bplElementName", new_uuid)
-#                setattr(start_evt, "bplElementId", new_uuid)
-#                setattr(start_evt, "bplElementUUID", new_uuid)
-#                if parent is not None:
-#                    start_evt.parent = parent
-#
-#                self.make_connector(node, start_evt, added_children[start_nodes.pop()][0])
-#
-#            end_evt = create_class("EndEvent")
-#            setattr(end_evt, "name", "EndEvent")
-#            getattr(node, "bplElements").append(end_evt)
-#            new_uuid = node.bplElementUUID + "_End"
-#            setattr(end_evt, "bplElementName", new_uuid)
-#            setattr(end_evt, "bplElementId", new_uuid)
-#            setattr(end_evt, "bplElementUUID", new_uuid)
-#            if parent is not None:
-#                end_evt.parent = parent
-#
-#            for end_src in end_nodes:
-#                self.make_connector(node, added_children[end_src][0], end_evt)
+            if len(start_nodes) != 1 and len(added_links) > 0 and min_x_src is not None:
+                start_evt = create_class("StartEvent")
+                setattr(start_evt, "name", "StartEvent")
+                getattr(node, "bplElements").append(start_evt)
+                new_uuid = node.bplElementUUID + "_Start"
+                setattr(start_evt, "bplElementName", new_uuid)
+                setattr(start_evt, "bplElementId", new_uuid)
+                setattr(start_evt, "bplElementUUID", new_uuid)
+                if parent is not None:
+                    start_evt.parent = parent
+                created_start = True
+
+                self.make_connector(node, start_evt, min_x_src)
+            elif len(start_nodes) == 1 and not created_start:
+                start_evt = create_class("StartEvent")
+                setattr(start_evt, "name", "StartEvent")
+                getattr(node, "bplElements").append(start_evt)
+                new_uuid = node.bplElementUUID + "_Start"
+                setattr(start_evt, "bplElementName", new_uuid)
+                setattr(start_evt, "bplElementId", new_uuid)
+                setattr(start_evt, "bplElementUUID", new_uuid)
+                if parent is not None:
+                    start_evt.parent = parent
+                created_start = True
+
+                self.make_connector(node, start_evt, added_children[start_nodes.pop()][0])
+
+            end_evt = create_class("EndEvent")
+            setattr(end_evt, "name", "EndEvent")
+            getattr(node, "bplElements").append(end_evt)
+            new_uuid = node.bplElementUUID + "_End"
+            setattr(end_evt, "bplElementName", new_uuid)
+            setattr(end_evt, "bplElementId", new_uuid)
+            setattr(end_evt, "bplElementUUID", new_uuid)
+            if parent is not None:
+                end_evt.parent = parent
+
+            for end_src in end_nodes:
+                self.make_connector(node, added_children[end_src][0], end_evt)
+            created_end = True
+
+        if created_start and not created_end:
+            end_evt = create_class("EndEvent")
+            setattr(end_evt, "name", "EndEvent")
+            getattr(node, "bplElements").append(end_evt)
+            new_uuid = node.bplElementUUID + "_End"
+            setattr(end_evt, "bplElementName", new_uuid)
+            setattr(end_evt, "bplElementId", new_uuid)
+            setattr(end_evt, "bplElementUUID", new_uuid)
+            if parent is not None:
+                end_evt.parent = parent
+            self.make_connector(node, prev_child, end_evt)
 
         return (node, self.create_siblings(parent, parent_field, obj, object_info, plan_table, object_id_table))
 
