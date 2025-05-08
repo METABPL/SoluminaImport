@@ -252,7 +252,7 @@ translate_table = {
         "children": [],
     },
     "SFPL_STEP_BUYOFF": {
-        "type": "SubProcess",
+        "type": "BuyoffTask",
         "attributes": {
             "bplElementName": "BUYOFF_ID",
             "bplElementId": "BUYOFF_ID",
