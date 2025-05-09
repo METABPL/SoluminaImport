@@ -1031,7 +1031,7 @@ class ImportSolumina:
             self.make_connector(node, start_evt, parallel)
 
             for child in node.bplElements:
-                node.x += 150
+                child.x += 150
                 self.make_connector(node, parallel, child)
 
             joiner = create_class("Parallel")
@@ -1044,7 +1044,7 @@ class ImportSolumina:
             if parent is not None:
                 joiner.parent = parent
 
-            joiner.x = node.bplElements[0].x
+            joiner.x = node.bplElements[0].x + 150
             joiner.y = node.bplElements[0].y
 
             for child in node.bplElements:
