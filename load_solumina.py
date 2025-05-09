@@ -876,8 +876,8 @@ class ImportSolumina:
                     self.make_connector(node, joiner, old_dst)
                     alternate_dst[best_dst] = joiner
 
-            min_x_src = None
-            min_x = None
+            min_op = None
+            min_src = None
             for link in matching_links:
                 src_id = getattr(link, link_info["src"])
                 dst_id = getattr(link, link_info["dst"])
@@ -891,9 +891,13 @@ class ImportSolumina:
                 src_node = added_children[src_id][0]
                 dst_node = added_children[dst_id][0]
 
-                if hasattr(src_node, "x") and (min_x is None or src_node.x < min_x):
-                    min_x_src = src_node
-                    min_x = src_node.x
+                if src_node.bplElementName.startswith("Operation"):
+                    if min_op is None:
+                        min_op = src_node.bplElementName
+                        min_src = src_node
+                    elif src_node.bplElementName < min_op:
+                        min_op = src_node.bplElementName
+                        min_src = src_node
 
                 if dst_id in start_nodes:
                     start_nodes.remove(dst_id)
@@ -948,7 +952,7 @@ class ImportSolumina:
                         if src_id in end_nodes:
                             end_nodes.remove(src_id)
 
-            if len(start_nodes) != 1 and len(added_links) > 0 and min_x_src is not None:
+            if len(start_nodes) != 1 and len(added_links) > 0 and min_src is not None:
                 start_evt = create_class("StartEvent")
                 setattr(start_evt, "name", "StartEvent")
                 getattr(node, "bplElements").append(start_evt)
@@ -960,7 +964,7 @@ class ImportSolumina:
                     start_evt.parent = parent
                 created_start = True
 
-                self.make_connector(node, start_evt, min_x_src)
+                self.make_connector(node, start_evt, min_src)
             elif len(start_nodes) == 1 and not created_start:
                 start_evt = create_class("StartEvent")
                 setattr(start_evt, "name", "StartEvent")
@@ -990,11 +994,6 @@ class ImportSolumina:
             created_end = True
 
         if isinstance(node, Process) and "SFPL_PLAN_LINK" not in plan_table and len(node.bplElements) > 0:
-            node.bplElements = sorted(node.bplElements, key=lambda n: n.bplElementName)
-
-            for i in range(0, len(node.bplElements)-1):
-                self.make_connector(node, node.bplElements[i], node.bplElements[i+1])
-
             start_evt = create_class("StartEvent")
             setattr(start_evt, "name", "StartEvent")
             new_uuid = node.bplElementUUID + "_Start"
@@ -1005,8 +1004,6 @@ class ImportSolumina:
                 start_evt.parent = parent
             created_start = True
 
-            self.make_connector(node, start_evt, node.bplElements[0])
-
             end_evt = create_class("EndEvent")
             setattr(end_evt, "name", "EndEvent")
             new_uuid = node.bplElementUUID + "_End"
@@ -1015,10 +1012,50 @@ class ImportSolumina:
             setattr(end_evt, "bplElementUUID", new_uuid)
             if parent is not None:
                 end_evt.parent = parent
-            self.make_connector(node, node.bplElements[-1], end_evt)
-            node.bplElements.append(start_evt)
-            node.bplElements.append(end_evt)
             created_end = True
+
+            parallel = create_class("Parallel")
+
+            setattr(parallel, "name", "GW Split")
+            new_uuid = node.bplElementUUID + "_GW_Split"
+            setattr(parallel, "bplElementName", new_uuid)
+            setattr(parallel, "bplElementId", new_uuid)
+            setattr(parallel, "bplElementUUID", new_uuid)
+            if parent is not None:
+                parallel.parent = parent
+                parent.bplElements.add(parallel)
+
+            parallel.x = node.bplElements[0].x
+            parallel.y = node.bplElements[0].y
+
+            self.make_connector(node, start_evt, parallel)
+
+            for child in node.bplElements:
+                node.x += 150
+                self.make_connector(node, parallel, child)
+
+            joiner = create_class("Parallel")
+
+            setattr(joiner, "name", "GW Join")
+            new_uuid = node.bplElementUUID + "_GW_Join"
+            setattr(joiner, "bplElementName", new_uuid)
+            setattr(joiner, "bplElementId", new_uuid)
+            setattr(joiner, "bplElementUUID", new_uuid)
+            if parent is not None:
+                joiner.parent = parent
+
+            joiner.x = node.bplElements[0].x
+            joiner.y = node.bplElements[0].y
+
+            for child in node.bplElements:
+                self.make_connector(node, child, joiner)
+
+            self.make_connector(node, joiner, end_evt)
+
+            node.bplElements.append(start_evt)
+            node.bplElements.append(parallel)
+            node.bplElements.append(joiner)
+            node.bplElements.append(end_evt)
 
         if created_start and not created_end:
             end_evt = create_class("EndEvent")
