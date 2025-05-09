@@ -359,6 +359,7 @@ class ImportSolumina:
             setattr(connector_node, "bplElementUUID", src.bplElementUUID+"_"+dst.bplElementUUID)
             setattr(connector_node, "bplElementId", src.bplElementUUID+"_"+dst.bplElementUUID)
             setattr(connector_node, "bplElementName", src.bplElementUUID+"_"+dst.bplElementUUID)
+            setattr(connector_node, "name", src_type + "2" + dst_type)
             setattr(connector_node, "src", src.bplElementId)
             setattr(connector_node, "dst", dst.bplElementId)
             setattr(connector_node, "fromNode", src)
