@@ -657,7 +657,7 @@ class ImportSolumina:
         if "children" in object_info:
             for child in object_info["children"]:
 
-                if self.is_process(node) and "connect" in child and child["connect"]:
+                if self.is_process(node) and "connect" in child and child["connect"] and not created_start:
                     prev_child = create_class("StartEvent")
                     getattr(node, child["parent_field"]).append(prev_child)
                     setattr(prev_child, "name", "StartEvent")
