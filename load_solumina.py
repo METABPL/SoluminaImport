@@ -78,8 +78,8 @@ translate_table = {
             "bplElementName": "${NODE_TYPE}${NODE_NO}",
             "bplElementId": "NODE_ID",
             "bplElementUUID": "NODE_ID",
-            "description": "NODE_TITLE",
-            "name": "NODE_TITLE",
+            "description": "$first(NODE_TITLE,${NODE_TYPE}${NODE_NO})",
+            "name": "$first(NODE_TITLE,${NODE_TYPE}${NODE_NO})",
         },
         "children": [
                      {"table": "SFPL_STEP_REV_Header", "keys": ["PLAN_ID", "OPER_KEY"], "orderBy": "STEP_NO",
@@ -602,42 +602,48 @@ class ImportSolumina:
 
         use_uuid = None
         for attr_name, attr_column in object_info["attributes"].items():
-            if attr_column == "$uuid":
-                if use_uuid is None:
-                    use_uuid = str(uuid.uuid4())
-                attr_value = use_uuid
-            elif attr_column.startswith("$text("):
-                attr_value = ""
-                text_cols = attr_column[6:len(attr_column)-1].split(",")
-                for text_col in text_cols:
-                    if hasattr(obj, text_col):
-                        next_attr_value = self.get_text(plan_table, getattr(obj, text_col))
-                        if attr_value is None or attr_value == "" and next_attr_value is not None and next_attr_value != "":
-                            attr_value = next_attr_value
-                    else:
-                        for join in joins:
-                            if hasattr(join, text_col):
-                                next_attr_value = self.get_text(plan_table, getattr(join, text_col))
-                                if attr_value is None or attr_value == "" and next_attr_value is not None and next_attr_value != "":
-                                    attr_value = next_attr_value
-                                if attr_value is not None:
-                                    break
-#                        print("{} has no column named {}".format(table_name, text_col))
-            elif "${" in attr_column:
-                attr_value = embedded_replace(attr_column, obj, joins)
+            if attr_column.startswith("$first("):
+                attr_columns = [col.strip() for col in attr_column[7:-1].split(",")]
             else:
-                attr_value = None
-                if hasattr(obj, attr_column):
-                    attr_value = getattr(obj, attr_column)
-                if attr_value is None:
-                    for join in joins:
-                        if hasattr(join, attr_column):
-                            attr_value = getattr(join, attr_column)
-                        if attr_value is not None:
-                            break
+                attr_columns = [attr_column]
 
-            if attr_value is not None:
-                setattr(node, attr_name, attr_value)
+            for attr_column in attr_columns:
+                if attr_column == "$uuid":
+                    if use_uuid is None:
+                        use_uuid = str(uuid.uuid4())
+                    attr_value = use_uuid
+                elif attr_column.startswith("$text("):
+                    attr_value = ""
+                    text_cols = attr_column[6:len(attr_column)-1].split(",")
+                    for text_col in text_cols:
+                        if hasattr(obj, text_col):
+                            next_attr_value = self.get_text(plan_table, getattr(obj, text_col))
+                            if attr_value is None or attr_value == "" and next_attr_value is not None and next_attr_value != "":
+                                attr_value = next_attr_value
+                        else:
+                            for join in joins:
+                                if hasattr(join, text_col):
+                                    next_attr_value = self.get_text(plan_table, getattr(join, text_col))
+                                    if attr_value is None or attr_value == "" and next_attr_value is not None and next_attr_value != "":
+                                        attr_value = next_attr_value
+                                    if attr_value is not None:
+                                        break
+    #                        print("{} has no column named {}".format(table_name, text_col))
+                elif "${" in attr_column:
+                    attr_value = embedded_replace(attr_column, obj, joins)
+                else:
+                    attr_value = None
+                    if hasattr(obj, attr_column):
+                        attr_value = getattr(obj, attr_column)
+                    if attr_value is None:
+                        for join in joins:
+                            if hasattr(join, attr_column):
+                                attr_value = getattr(join, attr_column)
+                            if attr_value is not None:
+                                break
+
+                if attr_value is not None:
+                    setattr(node, attr_name, attr_value)
 
         if "custom_content" in object_info:
             custom_func = object_info["custom_content"]
