@@ -177,6 +177,8 @@ translate_table = {
     },
     "SFPL_STEP_DAT_COL": {
         "type": "DataCollectionTask",
+        "join": [{"table": "SFPL_STEP_DAT_COL_LIMIT", "keys": ["PLAN_ID", "OPER_KEY", "STEP_KEY",
+                                                               "DAT_COL_ID"]}],
         "attributes": {
             "bplElementName": "DAT_COL_ID",
             "bplElementId": "DAT_COL_ID",
