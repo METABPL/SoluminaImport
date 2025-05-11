@@ -646,6 +646,7 @@ class ImportSolumina:
 
                 if attr_value is not None:
                     setattr(node, attr_name, attr_value)
+                    break
 
         if "custom_content" in object_info:
             custom_func = object_info["custom_content"]
