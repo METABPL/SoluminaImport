@@ -10,7 +10,7 @@ classmodel = sys.modules[FCO.__module__]
 
 embedded_re = re.compile(".*TextObject[(].*OBJECT_ID=([^,]*),.*")
 condition_forms = [
-    re.compile("(.*), +go to .*"),
+    re.compile("(.*),? +go to .*"),
     re.compile("(.*): +proceed to .*"),
     re.compile("(.*) +proceed to .*"),
     re.compile("(.*) +skip ahead to .*"),
@@ -415,7 +415,7 @@ class ImportSolumina:
     def compute_condition_expression(self, expr, true_path):
         if expr is None or expr == "":
             return ("", "")
-        if expr.startswith("Else"):
+        if expr.lower().startswith("else"):
             (ex2, _) = self.compute_condition_expression(true_path, true_path)
             op = None
             expr = expr[4:]
@@ -429,7 +429,7 @@ class ImportSolumina:
                         op = "0" + op
                     break
             if ex2 is not None:
-                return ("Not("+ex2+")", op)
+                return ("Not("+ex2+")", "Operation"+op)
             else:
                 return ("", "")
         if expr.startswith("If "):
@@ -474,8 +474,11 @@ class ImportSolumina:
             true_path = None
             false_path = None
             if len(parts) == 1:
-                parts = condition.split("Else")
+                parts = re.split("[Ee][Ll][Ss][Ee]", parts)
 
+            parts = [p.strip() for p in parts if len(p.strip()) > 0]
+            if len(parts) == 3 and parts[1].lower().startswith("if"):
+                parts = parts[1:]
             for p in parts:
                 if len(p) > 0:
                     if true_path is None:
@@ -934,9 +937,9 @@ class ImportSolumina:
                         other_src_id = getattr(other_link, link_info["src"])
                         other_dst_id = getattr(other_link, link_info["dst"])
                         if other_src_id == src_id and other_dst_id != dst_id:
-                            for other_conn in node.bplElements:
+                            for other_conn in src_node.nexts:
                                 if isinstance(other_conn, Gateway2Activity):
-                                    if other_conn.src == src_node:
+                                    if other_conn.src == src_node.bplElementId:
                                         other_target = getattr(other_conn, "conditionTarget")
                                         break
 
