@@ -375,6 +375,9 @@ class ImportSolumina:
             else:
                 setattr(connector_node, "conditionTarget", "")
 
+            if condition_expression is not None:
+                setattr(connector_node, "conditionExpression", condition_expression)
+
             if output is not None:
                 setattr(connector_node, "output", output)
         if hasattr(dst, "prevs") and src not in dst.prevs:
