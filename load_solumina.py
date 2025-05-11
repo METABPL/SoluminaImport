@@ -460,6 +460,11 @@ class ImportSolumina:
                 while len(op) < 3:
                     op = "0"+op
                 break
+        condition = condition.strip()
+        if condition.endswith(","):
+            condition = condition[:-1]
+        if condition.endswith("."):
+            condition = condition[:-1]
         return (condition, "Operation"+op)
 
     def compute_condition(self, condition_type, condition, dest, other_dest_name):
@@ -468,6 +473,9 @@ class ImportSolumina:
             parts = condition.split("\r")
             true_path = None
             false_path = None
+            if len(parts) == 1:
+                parts = condition.split("Else")
+
             for p in parts:
                 if len(p) > 0:
                     if true_path is None:
