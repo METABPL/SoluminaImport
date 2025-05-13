@@ -68,7 +68,7 @@ class WebgmeImport:
                 new_child.fromNode = new_src
                 new_child.toNode = new_dst
 
-                new_child.parent = node
+                new_child.parent = new_node
                 self.add_to_node_list(new_child, new_src.nexts)
                 self.add_to_node_list(new_child, new_dst.prevs)
                 self.add_to_node_list(new_child, new_node.bplElements)
@@ -80,7 +80,7 @@ class WebgmeImport:
                     new_child = getattr(class_model, child_type)()
                     self.copy_attrs(child, new_child)
                     node_map[child_uuid] = new_child
-                    new_child.parent = node
+                    new_child.parent = new_node
                 else:
                     new_child = node_map[child_uuid]
 
@@ -89,7 +89,7 @@ class WebgmeImport:
             elif self.is_type(child, "ResourceRequirement"):
                 for res_req in self.core.load_children(child):
                     new_res_req = self.import_node(res_req, node_map)
-                    new_res_req.parent = node
+                    new_res_req.parent = new_node
                     if new_res_req is not None:
                         self.add_to_node_list(new_res_req, new_node.resourceRequirements)
 
