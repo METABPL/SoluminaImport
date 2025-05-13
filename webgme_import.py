@@ -65,8 +65,8 @@ class WebgmeImport:
                 new_child = getattr(class_model, child_type)()
                 node_map[child_uuid] = new_child
                 self.copy_attrs(child, new_child)
-                new_child.fromNode = src_node
-                new_child.toNode = dst_node
+                new_child.fromNode = new_src
+                new_child.toNode = new_dst
 
                 self.add_to_node_list(new_child, new_src.nexts)
                 self.add_to_node_list(new_child, new_dst.prevs)
